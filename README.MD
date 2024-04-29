@@ -289,3 +289,55 @@ dimensions communes ou non à ces tables de faits.
 * Toutes les dimensions ne concernent pas les mesures
 * Redondances dans les dimensions
 * Alimentation complexe  
+
+## Concepts de base d’un process ETL:  
+
+**L'ETL (Extraction Transformation Loading)** est le processus de copie des données depuis les tables des systèmes transactionnels vers les tables du modèle décisionnel du data warehouse.  
+
+
+![ETL](elt.png)  
+
+L’ETL est un outil fondamental pour la construction des entrepôts de données.  
+* Il permet d’extraire les données des systèmes hétérogènes sources, les normalisent et les rendent
+cohérente entre elles pour qu’elles puissent être utilisées ensemble.  
+* Il permet également l’exécution des opérations de transformations de données selon les exigences de
+l’organisation dans une base de données de destination, charger les données dans une unique destination de base de données.  
+
+L’étape d’ETL constitue en moyenne **70%** d’un projet décisionnel, car ce système est complexe et
+ne doit rien laisser s’échapper sous peine d’avoir une mauvaise information dans l’entrepôt de
+données .  
+Le but étant de faire rentrer toutes les données de l’entreprise dans un modèle de données (Data
+Warehouse), ces données doivent être :
+
+* **Dénormaliser** : dans un Data Warehouse, avoir des doublons n'est pas important, avoir un schéma
+en troisième forme normale est même déconseillé. Il faut que les données apparaissent là où elles
+doivent apparaître. (Ex: un produit appartenant à plusieurs catégorie).  
+* **Nettoyer** : dans un système de transactionnel, les utilisateurs entrent les données. Les risques
+d'erreurs sont là : entrer la rue au lieu du pays, écrire Belgie au lieu de Belgique. Ces erreurs ont des
+répercussions directes sur les analyses (les commandes avec Belgie comme pays ne feront pas partie
+des commandes faites en Belgique). Il faut pouvoir détecter et corriger ces erreurs.  
+* **Contextualiser** : imaginez un système de paie où les informations sur l'activité et la paie des
+employés sont enregistrées, et un système de RH ou les informations personnelles des employés sont
+stockées. Un entrepôt de données possède une vision universelle, un employé est un employé, et il
+n'y aura qu'une seule dimension "Employé" avec toutes les informations le concernant.  
+* **Charger dans le Data Warehosue** : c'est l'étape la plus complexe, il s'agit ici d'ajouter les nouvelles lignes,
+voir si des lignes ont été modifiées et faire une gestion d'historique, voir si des lignes ont été
+supprimées et de le mentionner dans l'entrepôt, tout en faisant attention de ne pas charger plusieurs
+fois la même donnée.  
+
+
+## Choisir un outil ETL:
+
+![ETL TOOLS](etl-tools.png)  
+
+Pour bien choisir une solution ETL, plusieurs critères sont à considérer:
+1. L'indépendance aux différents OS: Linux, Windows, AIX,…
+2. Les différents connecteurs aux sources de données (SGBD, fichiers, FTP, Web Service, …)
+3. Les différents composants pour manipuler les données (Filter, Join, Transform, Sort, …)
+4. Capacité à faire appel à un langage de scripting (Perl, Python, VB, …)
+5. L'ouverture à des langages de programmation (Java, C++, C#, …)
+6. Ergonomie des interfaces graphiques
+7. Sécurisation des données (Chiffrement, anonymisation, masking)
+8. Les coûts des licences logicielles, infrastructure, formation et support.
+
+## Concepts de base d’un process ELT:  
