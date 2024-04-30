@@ -369,10 +369,14 @@ La transformation a lieu dans l'entrepôt de données cible. |
 
 ## Introcution to Snowflake (Modern Data Warehouse):    
 
+![snowflake architecture](images/dwh-evol.png)
+
 Snowflake est une plateforme d’entrepôt de données en mode SaaS qui centralise, dans le cloud, le stockage et le traitement de données structurées et semi-structurées. La génération croissante de données produites dans le monde entier nécessite une infrastructure moderne pour traiter les données. 
 
 Conçu de A à Z, Snowflake tire parti de l'élasticité offerte par le cloud et est véritablement révolutionnaire à tous égards.  
 L'élasticité du cloud est au cœur de Snowflake, ce qui rend son architecture unique et sa proposition de valeur difficiles à concurrencer sur le marché.  
+
+![snowflake architecture](images/snow-overview.png)
 
 ### Concepts clés et architecture:  
 
@@ -412,7 +416,6 @@ La couche de services Cloud constitue un ensemble de services qui coordonnent le
 
 * Les services gérés dans cette couche comprennent :
 
-
 * Authentification
 
 * Gestion de l’infrastructure
@@ -423,8 +426,24 @@ La couche de services Cloud constitue un ensemble de services qui coordonnent le
 
 * Contrôle d’accès
 
+![snowflake architecture](images/snow-services.png)
 
-### Connexion à Snowflake
+#### Virtual warehouses:  
+
+Un Virtual warehouses ou entrepôt virtuel, souvent appelé simplement « entrepôt », est un cluster de ressources de calcul dans Snowflake.  
+
+Un Virtual warehouses fournit les ressources requises, telles que le processeur, la mémoire et le stockage temporaire, pour effectuer les opérations suivantes dans une session Snowflake :
+
+* Exécuter des instructions SQL SELECT qui nécessitent des ressources de calcul (par exemple, récupérer des lignes à partir de tables et de vues).  
+
+* Effectuer des opérations DML, telles que :  
+    *   Mise à jour des lignes dans les tableaux (DELETE , INSERT , UPDATE).
+
+    * Chargement des données dans des tables (COPY INTO <table>).
+
+    * Déchargement des données des tables (COPY INTO <emplacement>).
+
+### Connexion à Snowflake:  
 Snowflake prend en charge plusieurs méthodes de connexion au service :  
 
 * Une interface utilisateur Web à partir de laquelle il est possible d’accéder à tous les aspects de la gestion et de l’utilisation de Snowflake.
@@ -437,10 +456,36 @@ Snowflake prend en charge plusieurs méthodes de connexion au service :
 
 * Des connecteurs tiers qui peuvent être utilisés pour connecter des applications, telles que des outils ETL (p. ex. Informatica) et des outils BI (comme ThoughtSpot) à Snowflake.
 
+![snowflake architecture](images/warehouse-size.png)
+
+
+#### Time Travel for data:
+
+* Versions précédentes des données automatiquement conservées. La durée de conservation sélectionnée par le client.  
+
+* Accessible via les extensions SQL
+* AS OF pour la sélection
+* CLONE pour la recréer
+* UNDROP récupère après une suppression accidentelle
+
+![snowflake architecture](images/time-travel.png)
+
+#### Zero-Copy Cloning:  
+
+Crée une copie d'un objet existant dans le système. Cette commande est principalement utilisée pour créer des clones sans copie de bases de données, de schémas et de tables.  
+
+![snowflake architecture](images/clonage.png)
+
+* Crée une copie indépendante des données pour les expériences
+
+* Minimise la duplication des données
+
+* Intégré au contrôle d'accès basé sur les rôles de Snowflake
+
+
 ### Éditions Snowflake: 
 
 Snowflake propose plusieurs éditions au choix, garantissant que votre utilisation correspond aux besoins spécifiques de votre organisation. Chaque édition successive s’appuie sur l’édition précédente en ajoutant des fonctionnalités spécifiques à l’édition et/ou des niveaux de service supérieurs. À mesure que les besoins de votre entreprise évoluent et grandissent, passer à une autre édition se fait en toute simplicité.  
-
 
 #### Standard Edition:
 Standard Edition est notre offre de niveau d’introduction, offrant un accès complet et illimité à toutes les fonctions standard de Snowflake. Elle fournit un équilibre solide entre les fonctionnalités, le niveau d’assistance et le coût.
