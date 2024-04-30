@@ -78,11 +78,11 @@ produit, …).
 selon différentes dimensions pour construire des indicateurs indispensables au pilotage de
 l’entreprise
 
-![cas usages data](use_cases.png)
+![cas usages data](images/use_cases.png)
 
 ## Architecture décisionnelle (Business Intelligence):  
 
-![synthèse d’une architecture décisionnelle](archi_bi.png)
+![synthèse d’une architecture décisionnelle](images/archi_bi.png)
 
 Il existe plusieurs architectures possibles pour un système décisionnel, l'architecture présentée
 est constituée de 5 couches:  
@@ -197,7 +197,7 @@ dimension ; une ou plusieurs mesures .
 * **Plusieurs tables de dimension** : descripteurs des 
 dimensions.
 
-![schema en etoile](star.png)
+![schema en etoile](images/star.png)
 
 * **Une table de faits**: Les faits sont indicateurs sur
 quoi va porter l'analyse. C’est une table qui
@@ -255,7 +255,7 @@ peut appartenir à plusieurs catégories).
 **Modèle en flocon = modèle en étoile +
 normalisation des dimensions.**
 
-![schema en flocon](snow.png)  
+![schema en flocon](images/snow.png)  
 
 **Avantages:**
 -------------  
@@ -275,7 +275,7 @@ des dimensions communes. Un modèle en constellation
 comprend donc plusieurs tables de faits et des tables de
 dimensions communes ou non à ces tables de faits.  
 
-![schema en constellation](galaxy.png)  
+![schema en constellation](images/galaxy.png)  
 
 **Avantages:**
 --------------
@@ -295,7 +295,7 @@ dimensions communes ou non à ces tables de faits.
 **L'ETL (Extraction Transformation Loading)** est le processus de copie des données depuis les tables des systèmes transactionnels vers les tables du modèle décisionnel du data warehouse.  
 
 
-![ETL](elt.png)  
+![ETL](images/elt.png)  
 
 L’ETL est un outil fondamental pour la construction des entrepôts de données.  
 * Il permet d’extraire les données des systèmes hétérogènes sources, les normalisent et les rendent
@@ -328,7 +328,7 @@ fois la même donnée.
 
 ## Choisir un outil ETL:
 
-![ETL TOOLS](etl-tools.png)  
+![ETL TOOLS](images/etl-tools.png)  
 
 Pour bien choisir une solution ETL, plusieurs critères sont à considérer:
 1. L'indépendance aux différents OS: Linux, Windows, AIX,…
@@ -352,7 +352,7 @@ Comprenons rapidement les différences entre ces deux méthodes.
 
 Dans ces deux méthodes on commence par l’extraction des données provenant d’une ou plusieurs sources : API, base de données, ERP, fichiers plats...  
 
-![ETL VS ELT](etlvselt.png)
+![ETL VS ELT](images/etlvselt.png)
 
 ### Résumé des différences : ETL versus ELT
 |Catégorie   | ETL   | ELT    |
@@ -395,7 +395,7 @@ L’architecture unique de Snowflake se compose de trois couches clés :
 * Services Cloud
 
 
-![snowflake architecture](snowflake-architecture.png)
+![snowflake architecture](images/snowflake-architecture.png)
 
 #### Stockage de bases de données:
 Lorsque les données sont chargées dans Snowflake, Snowflake réorganise ces données dans son format interne optimisé, compressé et en colonnes. Snowflake stocke ces données optimisées dans le stockage Cloud.  
