@@ -365,4 +365,88 @@ La transformation a lieu dans l'entrepôt de données cible. |
 | Compatibilité des données | Idéal avec des données structurées. | Peut gérer des données structurées, non structurées et semi-structurées. |  
 | Rapidité | L'ETL est plus lent que l'ELT. | L'ELT est plus rapide que l'ETL, car il peut utiliser les ressources internes de l'entrepôt de données. |
 | Coûts | La configuration peut être longue et coûteuse en fonction des outils ETL utilisés. | Plus rentable en fonction de l'infrastructure ELT utilisée. |
-| Sécurité | Peut nécessiter la création d'applications personnalisées pour répondre aux exigences de protection des données.| Vous pouvez utiliser les fonctionnalités intégrées de la base de données cible pour gérer la protection des données. |  
+| Sécurité | Peut nécessiter la création d'applications personnalisées pour répondre aux exigences de protection des données.| Vous pouvez utiliser les fonctionnalités intégrées de la base de données cible pour gérer la protection des données. |
+
+## Introcution to Snowflake (Modern Data Warehouse):    
+
+Snowflake est une plateforme d’entrepôt de données en mode SaaS qui centralise, dans le cloud, le stockage et le traitement de données structurées et semi-structurées. La génération croissante de données produites dans le monde entier nécessite une infrastructure moderne pour traiter les données. 
+
+Conçu de A à Z, Snowflake tire parti de l'élasticité offerte par le cloud et est véritablement révolutionnaire à tous égards.  
+L'élasticité du cloud est au cœur de Snowflake, ce qui rend son architecture unique et sa proposition de valeur difficiles à concurrencer sur le marché.  
+
+### Concepts clés et architecture:  
+
+Snowflake combine un tout nouveau moteur d’interrogation SQL avec une architecture novatrice, conçue spécialement pour le Cloud. Pour l’utilisateur, Snowflake offre toutes les fonctionnalités d’une base de données analytique d’entreprise, ainsi que de nombreuses autres fonctionnalités spéciales et des capacités uniques.  
+
+Snowflake est un véritable service autogéré, ce qui signifie :
+
+* Il n’y a aucun matériel (virtuel ou physique) à sélectionner, installer, configurer ou gérer.
+
+* Il n’y a pratiquement aucun logiciel à installer, à configurer ou à gérer.
+
+* La maintenance, la gestion, les mises à jour et les réglages sont assurés par Snowflake.  
+
+L’architecture unique de Snowflake se compose de trois couches clés :
+
+* Stockage de bases de données
+
+* Traitement des requêtes
+
+* Services Cloud
+
+
+![snowflake architecture](snowflake-architecture.png)
+
+#### Stockage de bases de données:
+Lorsque les données sont chargées dans Snowflake, Snowflake réorganise ces données dans son format interne optimisé, compressé et en colonnes. Snowflake stocke ces données optimisées dans le stockage Cloud.  
+
+Snowflake gère tous les aspects du stockage de ces données : l’organisation, la taille des fichiers, la structure, la compression, les métadonnées, les statistiques, etc. Les objets de données stockés par Snowflake ne sont ni directement visibles ni directement accessibles par les clients. Ils ne sont accessibles que par des opérations de requête SQL exécutées avec Snowflake.  
+
+#### Traitement des requêtes:
+L’exécution de la requête s’effectue dans la couche de traitement. Snowflake traite les requêtes à l’aide « d’entrepôts virtuels ». Chaque entrepôt virtuel est une grappe de calcul à traitement massivement parallèle (MPP) composée de plusieurs nœuds de calcul alloués par Snowflake à partir d’un fournisseur Cloud.  
+
+Chaque entrepôt virtuel est une grappe de calcul indépendante qui ne partage aucune ressource de calcul avec d’autres entrepôts virtuels. Par conséquent, chaque entrepôt virtuel n’a aucune conséquence sur les performances des autres entrepôts virtuels.  
+
+#### Services Cloud:
+La couche de services Cloud constitue un ensemble de services qui coordonnent les activités dans Snowflake. Ces services relient tous les différents composants de Snowflake afin de traiter les demandes des utilisateurs, de la connexion à l’envoi des requêtes. La couche de services Cloud s’exécute également sur des instances de calcul fournies par Snowflake à partir du fournisseur Cloud.
+
+* Les services gérés dans cette couche comprennent :
+
+
+* Authentification
+
+* Gestion de l’infrastructure
+
+* Gestion des métadonnées
+
+* Analyse syntaxique et optimisation des requêtes
+
+* Contrôle d’accès
+
+
+### Connexion à Snowflake
+Snowflake prend en charge plusieurs méthodes de connexion au service :  
+
+* Une interface utilisateur Web à partir de laquelle il est possible d’accéder à tous les aspects de la gestion et de l’utilisation de Snowflake.
+
+* Des clients de ligne de commande (p. ex. SnowSQL) qui peuvent également accéder à tous les aspects de la gestion et de l’utilisation de Snowflake.
+
+* Des pilotes ODBC et JDBC qui peuvent être utilisés par d’autres applications (p. ex. Tableau) pour se connecter à Snowflake.
+
+* Des connecteurs natifs (p. ex. Python, Spark) qui peuvent être utilisés pour développer des applications de connexion à Snowflake.
+
+* Des connecteurs tiers qui peuvent être utilisés pour connecter des applications, telles que des outils ETL (p. ex. Informatica) et des outils BI (comme ThoughtSpot) à Snowflake.
+
+### Éditions Snowflake: 
+
+Snowflake propose plusieurs éditions au choix, garantissant que votre utilisation correspond aux besoins spécifiques de votre organisation. Chaque édition successive s’appuie sur l’édition précédente en ajoutant des fonctionnalités spécifiques à l’édition et/ou des niveaux de service supérieurs. À mesure que les besoins de votre entreprise évoluent et grandissent, passer à une autre édition se fait en toute simplicité.  
+
+
+#### Standard Edition:
+Standard Edition est notre offre de niveau d’introduction, offrant un accès complet et illimité à toutes les fonctions standard de Snowflake. Elle fournit un équilibre solide entre les fonctionnalités, le niveau d’assistance et le coût.
+
+#### Enterprise Edition:
+Enterprise Edition offre tous les services et fonctions de Standard Edition avec des fonctions supplémentaires conçues spécialement pour répondre aux besoins des entreprises et organisations de grande envergure.
+
+#### Business Critical Edition:
+Business Critical Edition, anciennement appelé Enterprise for Sensitive Data (ESD), offre une protection accrue des données afin de faire face aux besoins des entreprises possédant des données extrêmement sensibles, plus particulièrement des informations de santé protégées PHI devant respecter les lois HIPAA et HITRUST CSF .
