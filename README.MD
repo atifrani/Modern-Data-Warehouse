@@ -341,3 +341,28 @@ Pour bien choisir une solution ETL, plusieurs critères sont à considérer:
 8. Les coûts des licences logicielles, infrastructure, formation et support.
 
 ## Concepts de base d’un process ELT:  
+
+Comme son nom l’indique, l’ELT consiste à charger les données dans un entrepôt de données avant d’y appliquer les éventuels traitements.  
+
+Cette méthode est une alternative de l’ETL. Cette dernière extrait les données depuis la source vers une machine de traitement (Spark, snowflake, Bigquery, etc…) puis une fois le traitement effectué déplace une nouvelle fois les données vers les bases de données d’exposition.  
+
+Comprenons rapidement les différences entre ces deux méthodes.  
+
+### ELT vs ETL:  
+
+Dans ces deux méthodes on commence par l’extraction des données provenant d’une ou plusieurs sources : API, base de données, ERP, fichiers plats...  
+
+![ETL VS ELT](etlvselt.png)
+
+### Résumé des différences : ETL versus ELT
+|Catégorie   | ETL   | ELT    |
+-------------|-------|--------|
+| Signification | Extraction, transformation et chargement |
+Extraction, chargement et transformation |  
+| Traitement |   Prend des données brutes, les transforme dans un format prédéterminé, puis les charge dans l'entrepôt de données cible. | Prend des données brutes, les charge dans l'entrepôt de données cible, puis les transforme juste avant l'analyse. |
+| Lieux de transformation et de chargement | La transformation s'effectue sur un serveur de traitement secondaire. | 
+La transformation a lieu dans l'entrepôt de données cible. |
+| Compatibilité des données | Idéal avec des données structurées. | Peut gérer des données structurées, non structurées et semi-structurées. |  
+| Rapidité | L'ETL est plus lent que l'ELT. | L'ELT est plus rapide que l'ETL, car il peut utiliser les ressources internes de l'entrepôt de données. |
+| Coûts | La configuration peut être longue et coûteuse en fonction des outils ETL utilisés. | Plus rentable en fonction de l'infrastructure ELT utilisée. |
+| Sécurité | Peut nécessiter la création d'applications personnalisées pour répondre aux exigences de protection des données.| Vous pouvez utiliser les fonctionnalités intégrées de la base de données cible pour gérer la protection des données. |  
