@@ -327,7 +327,7 @@ Exécuter quelques requêtes:
 Accédez à la feuille de calcul CITIBIKE_ONE et modifiez l'entrepôt pour utiliser le nouvel entrepôt que vous avez créé dans la dernière section.  
 Le contexte de votre feuille de calcul doit être le suivant :  
 
-**Rôle : ACCOUNTADMIN**
-**Entrepôt : ANALYTICS_WH (L)**
-**Base de données : CITIBIKE** 
-**Schema : PUBLIC**
+**Rôle : ACCOUNTADMIN**  
+**Entrepôt : ANALYTICS_WH (L)**  
+**Base de données : CITIBIKE**   
+**Schema : PUBLIC**  
