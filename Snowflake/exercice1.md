@@ -101,3 +101,233 @@ Les données comprennent des informations sur les temps de trajet, les emplaceme
 Vous trouverez ci-dessous un extrait de l'un des fichiers de données CSV de Citi Bike :
 
 ![snowflake load](../images/citicsv.png)
+
+### Créer une base de données et une table:  
+Tout d'abord, créons une base de données appelée **CITIBIKE** à utiliser pour charger les données structurées.
+Assurez-vous que vous utilisez le rôle **ACCOUNTADMIN ** en sélectionnant Changer de **rôle > ACCOUNTADMIN.**  
+Accédez à l'onglet Bases de données. Cliquez sur Créer, nommez la base de données **CITIBIKE*, puis cliquez sur CRÉER.
+
+![snowflake load](../images/citibike1.png)
+
+Accédez maintenant à l’onglet Feuilles de calcul. Si vous n'avez aucune feuille de calcul créée, cliquez sur créer une feuille de calcul.  
+Sélectionnez les paramètres contextuels suivants :  
+Rôle : **ACCOUNTADMIN**  
+Entrepôt : **COMPUTE_WH**    
+Nous utilisons ici l'interface utilisateur pour définir le contexte. Plus tard dans le laboratoire, nous accomplirons la même chose via des commandes SQL dans la feuille de calcul.
+
+![snowflake load](../images/citibike2.png)  
+
+Ensuite, dans la liste déroulante de la base de données, sélectionnez les paramètres de contexte suivants :  
+Base de données : **CITIBIKE**   
+Schema : **PUBLIC**  
+
+
+Pour faciliter le travail dans la feuille de calcul, renommez-la. Dans le coin supérieur gauche, cliquez sur le nom de la feuille de calcul, qui correspond à l'horodatage de la création de la feuille de calcul, et remplacez-le par **CITIBIKE_ONE**.  
+Ensuite, nous créons une table appelée TRIPS à utiliser pour charger les données délimitées par des virgules. Au lieu d'utiliser l'interface utilisateur, nous utilisons la feuille de calcul pour exécuter le DDL qui crée la table. Copiez le texte SQL suivant dans votre feuille de calcul :  
+
+```
+create or replace table trips
+(tripduration integer,
+starttime timestamp,
+stoptime timestamp,
+start_station_id integer,
+start_station_name string,
+start_station_latitude float,
+start_station_longitude float,
+end_station_id integer,
+end_station_name string,
+end_station_latitude float,
+end_station_longitude float,
+bikeid integer,
+membership_type string,
+usertype string,
+birth_year integer,
+gender integer);
+```  
+
+Exécutez la requête en plaçant votre curseur n'importe où dans le texte SQL et en cliquant sur le bouton bleu Lire/Exécuter en haut à droite de la feuille de calcul. Ou utilisez le raccourci clavier [Ctrl]/[Cmd]+[Entrée].
+Vérifiez que votre table TRIPS a été créée. Au bas de la feuille de calcul, vous devriez voir une section Résultats affichant un message « Table TRIPS créée avec succès ».  
+
+Accédez à l'onglet Bases de données en cliquant sur l'icône ACCUEIL dans le coin supérieur gauche de la feuille de calcul. Cliquez ensuite sur Données > Bases de données. Dans la liste des bases de données, cliquez sur CITIBIKE > PUBLIC > TABLES pour voir votre table TRIPS nouvellement créée. Si vous ne voyez aucune base de données sur la gauche, développez votre navigateur car elles peuvent être masquées.  
+
+Cliquez sur TRIPS et sur l'onglet Colonnes pour voir la structure de table que vous venez de créer.  
+
+### Créer un External Stage:  
+
+Nous travaillons avec des données structurées, délimitées par des virgules, qui ont déjà été stockées dans un compartiment S3 public et externe. Avant de pouvoir utiliser ces données, nous devons d'abord créer une scène qui spécifie l'emplacement de notre bucket externe.  
+
+Dans l'onglet Bases de données, cliquez sur la base de données CITIBIKE et le schéma PUBLIC. Dans l'onglet Étapes, cliquez sur le bouton Créer, puis sur Étape > Amazon S3.  
+
+![snowflake load](../images/citibike4.png) 
+
+Dans la boîte de dialogue « Créer un objet sécurisable » qui s'ouvre, remplacez les valeurs suivantes dans l'instruction SQL :  
+nom_stage : **citibike_trips**  
+URL : **s3://logbrain-datalake/datasets/citibike-trips-csv/**  
+
+Remarque : Assurez-vous d'inclure la barre oblique finale (/) à la fin de l'URL, sinon vous rencontrerez des erreurs plus tard lors du chargement des données à partir du compartiment. Assurez-vous également d'avoir supprimé l'instruction 'credentials = (...)' qui n'est pas obligatoire. La commande create stage devrait ressembler exactement à celle présentée ci-dessus.  
+
+Le compartiment S3 de cet atelier est public, vous pouvez donc laisser les options d'informations d'identification vides dans l'instruction. Dans un scénario réel, le compartiment utilisé pour une étape externe nécessiterait probablement des informations clés.  
+
+  
+![snowflake load](../images/citibike5.png)   
+
+Jetons maintenant un œil au contenu de l'étape citibike_trips. Accédez à l'onglet Feuilles de calcul et exécutez l'instruction SQL suivante :  
+
+```
+list @citibike_trips;
+```
+
+Dans les résultats du volet inférieur, vous devriez voir la liste des fichiers de le stage:  
+
+![snowflake load](../images/citibike6.png)   
+
+### Créer un format de fichier :
+
+Avant de pouvoir charger les données dans Snowflake, nous devons créer un format de fichier qui correspond à la structure des données.  
+Dans la feuille de calcul, exécutez la commande suivante pour créer le format de fichier :  
+
+
+```
+create or replace file format csv type='csv'
+  compression = 'auto' field_delimiter = ','
+  record_delimiter = '\n'  skip_header = 0
+  field_optionally_enclosed_by = '\042' trim_space = false
+  error_on_column_count_mismatch = false escape = 'none'
+  escape_unenclosed_field = '\134'
+  date_format = 'auto' timestamp_format = 'auto'
+  null_if = ('') comment = 'file format for ingesting csv';
+
+```  
+
+Vérifiez que le format de fichier a été créé avec les paramètres corrects en exécutant la commande suivante:
+
+```
+show file formats in database citibike;
+```
+### Chargement des données:
+Dans cette section, nous utiliserons un entrepôt virtuel et la commande COPY pour lancer le chargement groupé de données structurées dans la table Snowflake que nous avons créée dans le dernier module.  
+
+#### Redimensionner et utiliser un entrepôt pour le chargement des données:
+
+Des ressources de calcul sont nécessaires pour charger les données. Les nœuds de calcul de Snowflake sont appelés entrepôts virtuels et ils peuvent être dimensionnés ou agrandis dynamiquement en fonction de la charge de travail, que vous chargiez des données, exécutiez une requête ou effectuiez une opération DML. Chaque charge de travail peut avoir son propre entrepôt afin qu'il n'y ait pas de conflit de ressources.  
+
+Accédez à l'onglet Entrepôts (sous Admin). C'est ici que vous pouvez visualiser tous vos entrepôts existants et analyser leurs tendances d'utilisation.  
+
+Notez l'option + Entrepôt dans le coin supérieur droit du haut. C'est ici que vous pouvez ajouter rapidement un nouvel entrepôt. Cependant, nous souhaitons utiliser l'entrepôt existant COMPUTE_WH inclus dans l'environnement d'essai de 30 jours.  
+
+Cliquez sur la ligne de l'entrepôt COMPUTE_WH. Cliquez ensuite sur le ... (point point point) dans le texte du coin supérieur droit au-dessus pour voir les actions que vous pouvez effectuer sur l'entrepôt. Nous utiliserons cet entrepôt pour charger les données d'AWS S3.  
+
+![snowflake load](../images/citibike7.png)   
+
+Cliquez sur Modifier pour parcourir les options de cet entrepôt. Dans cet atelier, nous ne verrons pas les entrepôts Mode, cluster ou multi-cluster.  
+
+La liste déroulante Taille permet de sélectionner la capacité de l'entrepôt. Pour les opérations de chargement de données plus volumineuses ou les requêtes plus gourmandes en calcul, un entrepôt plus grand est recommandé. Les tailles se traduisent par les ressources de calcul sous-jacentes fournies par le fournisseur de cloud (AWS, Azure ou GCP) où votre compte Snowflake est hébergé.  
+
+Il détermine également le nombre de crédits consommés par l'entrepôt pour chaque heure complète de fonctionnement. Plus la taille est grande, plus les ressources de calcul du fournisseur de cloud sont allouées à l'entrepôt et plus il consomme de crédits.  
+
+Par exemple, le paramètre 4X-Large consomme 128 crédits pour chaque heure complète. Ce dimensionnement peut être modifié à la hausse ou à la baisse à tout moment d’un simple clic.  
+
+Sous Options avancées d'entrepôt, les options vous permettent de suspendre automatiquement l'entrepôt lorsqu'il n'est pas utilisé afin qu'aucun crédit ne soit inutilement consommé. Il existe également une option permettant de reprendre automatiquement un entrepôt suspendu. Ainsi, lorsqu'une nouvelle charge de travail lui est envoyée, il redémarre automatiquement. Cette fonctionnalité active le modèle de facturation efficace de Snowflake « payez uniquement pour ce que vous utilisez » qui vous permet de faire évoluer vos ressources lorsque cela est nécessaire et de les réduire ou de les désactiver automatiquement lorsque vous n'en avez pas besoin, éliminant ainsi presque les ressources inutilisées.  
+
+Attention : surveillez vos dépenses ! Pendant ou après cet atelier, vous devez faire attention à ne pas effectuer les actions suivantes sans raison valable, sinon vous risquez d'épuiser vos 400 $ de crédits gratuits plus rapidement que souhaité :  
+* Ne désactivez pas la suspension automatique. Si la suspension automatique est désactivée, vos entrepôts continuent de fonctionner et de consommer des crédits même lorsqu'ils ne sont pas utilisés.  
+* N'utilisez pas une taille d'entrepôt excessive compte tenu de la charge de travail. Plus l'entrepôt est grand, plus les crédits sont consommés.  
+
+Nous allons utiliser cet entrepôt virtuel pour charger les données structurées dans les fichiers CSV (stockés dans le compartiment AWS S3) dans Snowflake. Cependant, nous allons d’abord modifier la taille de l’entrepôt pour augmenter les ressources de calcul qu’il utilise. Après le chargement, notez le temps pris puis, dans une étape ultérieure de cette section, nous refaireons la même opération de chargement avec un entrepôt encore plus grand, en observant son temps de chargement plus rapide.  
+
+Modifiez la taille de cet entrepôt de données de X-Small à Small. puis cliquez sur le bouton Enregistrer l'entrepôt :  
+
+![snowflake load](../images/citibike8.png)  
+
+Charger les données
+Nous pouvons maintenant exécuter une commande COPY pour charger les données dans la table TRIPS que nous avons créée précédemment.  
+
+Revenez à la feuille de calcul CITIBIKE_ONE dans l'onglet Feuilles de calcul. 
+
+Assurez-vous que le contexte de la feuille de calcul est correctement défini :  
+
+**Rôle : CITIBIKE_ONE**  
+**Entrepôt : COMPUTE_WH**   
+**Base de données : CITIBIKE**  
+**Schéma : PUBLIC**  
+
+Exécutez les instructions suivantes dans la feuille de calcul pour charger les données intermédiaires dans la table. Cela peut prendre jusqu'à 60 secondes.  
+
+``` 
+copy into trips from @citibike_trips file_format=csv PATTERN = '.*csv.*' ;
+
+``` 
+
+Dans le volet des résultats, vous devriez voir l'état de chaque fichier chargé. Une fois le chargement terminé, dans le volet Détails de la requête en bas à droite, vous pouvez faire défiler les différents statuts, statistiques d'erreurs et visualisations de la dernière instruction exécutée :  
+
+![snowflake load](../images/citibike9.png)
+
+Ensuite, accédez à l'onglet Historique des requêtes en cliquant sur l'icône Accueil, puis sur Activité > Historique des requêtes.  
+
+Sélectionnez la requête en haut de la liste, qui doit être l'instruction COPY INTO qui a été exécutée pour la dernière fois. Sélectionnez l'onglet Profil de requête et notez les étapes d'exécution de la requête, les détails de la requête, les nœuds les plus coûteux et les statistiques supplémentaires.  
+
+![snowflake load](../images/citibike10.png)
+
+
+Rechargeons maintenant la table TRIPS avec un entrepôt plus grand pour voir l'impact des ressources de calcul supplémentaires sur le temps de chargement.  
+
+Revenez à la feuille de calcul et utilisez la commande TRUNCATE TABLE pour effacer la table de toutes les données et métadonnées :  
+
+
+``` 
+truncate table trips
+
+``` 
+
+Vérifiez que la table est vide en exécutant la commande suivante :  
+
+
+``` 
+select * from trips limit 10;
+``` 
+
+Le résultat doit afficher "La requête n'a produit aucun résultat".  
+
+Modifiez la taille de l'entrepôt en grande à l'aide de la commande suivante, ALTER WAREHOUSE :  
+
+``` 
+alter warehouse compute_wh set warehouse_size='large';
+``` 
+
+Vérifiez le changement à l'aide de la commande suivante, show warehouses;
+
+
+``` 
+show warehouses;
+``` 
+
+La taille peut également être modifiée à l'aide de l'interface utilisateur en cliquant sur la zone contextuelle de la feuille de calcul, puis sur l'icône Configurer (3 lignes) sur le côté droit de la zone contextuelle et en changeant Small à Large dans la liste déroulante Taille.
+
+Exécutez la même instruction COPY INTO que précédemment pour charger à nouveau les mêmes données :  
+
+``` 
+copy into trips from @citibike_trips file_format=csv PATTERN = '.*csv.*' ;
+``` 
+
+
+Une fois le chargement terminé, revenez à la page Requêtes (icône Accueil > Activité > Historique des requêtes). Comparez les heures des deux commandes COPY INTO. Le chargement via le Grand entrepôt a été nettement plus rapide.  
+
+#### Créer un nouvel entrepôt pour l'analyse des données
+Pour en revenir à l'histoire du laboratoire, supposons que l'équipe Citi Bike souhaite éliminer les conflits de ressources entre ses charges de travail de chargement de données/ETL et les utilisateurs finaux analytiques utilisant des outils BI pour interroger Snowflake. Comme mentionné précédemment, Snowflake peut facilement y parvenir en attribuant différents entrepôts de taille appropriée à diverses charges de travail. Étant donné que Citi Bike dispose déjà d'un entrepôt pour le chargement des données, créons un nouvel entrepôt pour les utilisateurs finaux qui exécutent des analyses.  
+Nous utiliserons cet entrepôt pour effectuer des analyses dans la section suivante.  
+Accédez à l'onglet Admin > Entrepôts, cliquez sur + Entrepôt, nommez le nouvel entrepôt « et définissez la taille sur Large».  
+
+Cliquez sur  Créer Warehouse pour créer un nouveau warehouse.
+
+![snowflake load](../images/citibike11.png)
+
+
+Exécuter quelques requêtes:  
+
+Accédez à la feuille de calcul CITIBIKE_ONE et modifiez l'entrepôt pour utiliser le nouvel entrepôt que vous avez créé dans la dernière section.  
+Le contexte de votre feuille de calcul doit être le suivant :  
+
+**Rôle : ACCOUNTADMIN**
+**Entrepôt : ANALYTICS_WH (L)**
+**Base de données : CITIBIKE** 
+**Schema : PUBLIC**
