@@ -237,8 +237,8 @@ La puissance analytique de l'entrepôt est proportionnelle à la richesse et la 
 
 **Inconvénients:**
 -----------------
-* Toutesles dimensions ne concernent pasles mesures
-* Redondancesdans les dimensions
+* Toutes les dimensions ne concernent pasles mesures
+* Redondances dans les dimensions
 * Alimentation complexe.
 
 ### Modèle en flocon:  
