@@ -481,8 +481,9 @@ from json_weather_data;
 #### Exécutez la requête suivantes sur le View:  
 
 ```
+
 select * from json_weather_data_view
-where date_trunc('month',observation_time) = '2018-01-01'
+where date(obsTime) = '2018-01-01'
 limit 20;
 
 ```
@@ -492,11 +493,11 @@ limit 20;
 Nous allons maintenant joindre les données météorologiques JSON à nos données CITIBIKE.PUBLIC.TRIPS pour déterminer le réponse à notre question initiale sur l'impact de la météo sur le nombre de trajets.  
 
 ```
-select weather as conditions ,count(*) as num_trips
+select WHEATHERCONDITION as WHEATHERCONDITION ,count(*) as num_trips
 from citibike.public.trips
 left outer join json_weather_data_view
-on date_trunc('hour', observation_time) = date_trunc('hour', starttime)
-where conditions is not null
+on date(observation_time) = date(starttime)
+where WHEATHERCONDITION is not null
 group by 1 order by 2 desc;
 
 ```
