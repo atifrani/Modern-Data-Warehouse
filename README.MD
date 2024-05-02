@@ -233,7 +233,7 @@ La puissance analytique de l'entrepôt est proportionnelle à la richesse et la 
 * Facilité de navigation
 * Performances : nombre de jointures limité ;
 * Gestion des agrégats
-* Fiabilité desrésultats
+* Fiabilité des résultats
 
 **Inconvénients:**
 -----------------
