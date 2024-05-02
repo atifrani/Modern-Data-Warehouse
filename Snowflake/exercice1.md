@@ -331,3 +331,247 @@ Le contexte de votre feuille de calcul doit être le suivant :
 **Entrepôt : ANALYTICS_WH (L)**  
 **Base de données : CITIBIKE**   
 **Schema : PUBLIC**  
+
+
+1. Requête pour afficher pour chaque heure le nombre de trajets, la durée moyenne des trajets et la distance moyenne du trajet.  
+ 
+```
+select  date_trunc('hour', starttime) as "date",
+        count(*) as "num trips",
+        avg(tripduration)/60 as "avg duration (mins)",
+        avg(haversine(start_station_latitude, 
+        start_station_longitude, 
+        end_station_latitude,
+        end_station_longitude)) as "avg distance (km)"
+from trips
+group by 1 
+order by 1;
+```   
+
+Snowflake dispose d'un cache de résultats qui contient les résultats de chaque requête exécutée au cours des dernières 24 heures. Celles-ci sont disponibles dans tous les entrepôts, de sorte que les résultats de requête renvoyés à un utilisateur sont disponibles pour tout autre utilisateur du système qui exécute la même requête.  
+
+Non seulement ces requêtes répétées renvoient extrêmement rapides, mais ils n'utilisent pas non plus de crédits de calcul.  
+
+Voyons le cache de résultats en action en exécutant à nouveau exactement la même requête.  
+
+```
+select  date_trunc('hour', starttime) as "date",
+        count(*) as "num trips",
+        avg(tripduration)/60 as "avg duration (mins)",
+        avg(haversine(start_station_latitude, 
+        start_station_longitude, 
+        end_station_latitude,
+        end_station_longitude)) as "avg distance (km)"
+from trips
+group by 1 
+order by 1;
+```   
+
+2. Exécutons ensuite cette requête pour voir quels jours de la semaine sont les plus occupés :  
+
+```
+select
+    dayname(starttime) as "day of week",
+    count(*) as "num trips"
+from trips
+group by 1 order by 2 desc;
+```
+
+### Créer un clone de la table trips:
+
+Exécutez la commande suivante dans la feuille de calcul pour créer une table de développement (dev).
+    
+```
+create table trips_dev clone trips
+
+```
+
+
+## Travailler avec des données semi-structurées:
+
+Pour ce faire, dans ce module nous allons :  
+
+* Charger les données météorologiques au format JSON conservées dans un bucket S3 public.  
+* Créez une vue et interrogez les données semi-structurées à l'aide de la notation par points SQL.  
+* Exécuter une requête qui joint les données JSON aux données TRIPS d'un module précédent de ce guide.  
+* Découvrez l'impact de la météo sur le nombre de déplacements.  
+
+Les données JSON sont constituées d'informations météorologiques fournies par **OpenWeatherMap** détaillant l'historique conditions de la ville de New York du 05/07/2016 au 25/06/2019. Il est également organisé sur AWS S3 où le les données représentent 57,9 000 lignes, 61 objets et une taille totale de 2,5 Mo compressées.  
+
+![snowflake load](../images/json.png)
+
+#### Créer la base de données :  
+
+```
+create database weather;
+
+```
+
+#### Créer la table weather:  
+
+créons maintenant une table appelée **JSON_WEATHER_DATA** qui sera utilisé pour charger les données JSON. Dans la feuille de calcul, exécutez le texte SQL ci-dessous. Snowflake a un type de colonne spécial appelé **VARIANT** qui nous permettra de stocker l'intégralité de l'objet JSON et éventuellement de l'interroger directement.  
+
+```
+create table json_weather_data (v variant);
+
+```
+
+Vérifiez que votre table JSON_WEATHER_DATA a été créée. Au bas de la feuille de calcul, vous devriez voir une section « Résultats » qui indique « Table JSON_WEATHER_DATA créée avec succès ».  
+
+
+#### Créer un external stage:
+
+```
+create stage nyc_weather url = 's3://logbrain-datalake/datasets/weather-nyc';
+
+```
+
+Vérifiez que le stage est crée.  
+
+```
+list @nyc_weather;
+
+```
+
+#### Charger les données dans la table:  
+
+```
+copy into json_weather_data from @nyc_weather file_format = (type=json);
+
+```
+
+Vérifiez que le données sont  chargées:  
+
+```
+select * from json_weather_data limit 10;
+```
+
+#### Créer une vue et interroger des données semi-structurées:  
+
+créez une vue des données météorologiques JSON non structurées dans une vue en colonnes afin qu'il soit plus facile à comprendre et à interroger pour les analystes. Pour information : l'identifiant de la ville de New York est 5128638.  
+
+```
+create view json_weather_data_view as
+select
+ v:time::timestamp as observation_time,
+ v:city.id::int as city_id,
+ v:city.name::string as city_name,
+ v:city.country::string as country,
+ v:city.coord.lat::float as city_lat,
+ v:city.coord.lon::float as city_lon,
+ v:clouds.all::int as clouds,
+ (v:main.temp::float)-273.15 as temp_avg,
+ (v:main.temp_min::float)-273.15 as temp_min,
+ (v:main.temp_max::float)-273.15 as temp_max,
+ v:weather[0].main::string as weather,
+ v:weather[0].description::string as weather_desc,
+ v:weather[0].icon::string as weather_icon,
+ v:wind.deg::float as wind_dir,
+ v:wind.speed::float as wind_speed
+from json_weather_data
+where city_id = 5128638;
+```
+
+#### Exécutez la requête suivantes sur le View:  
+
+```
+select * from json_weather_data_view
+where date_trunc('month',observation_time) = '2018-01-01'
+limit 20;
+
+```
+
+#### Utiliser une opération de jointure pour établir une corrélation entre les deux ensembles de données:  
+
+Nous allons maintenant joindre les données météorologiques JSON à nos données CITIBIKE.PUBLIC.TRIPS pour déterminer le réponse à notre question initiale sur l'impact de la météo sur le nombre de trajets.  
+
+```
+select weather as conditions ,count(*) as num_trips
+from citibike.public.trips
+left outer join json_weather_data_view
+on date_trunc('hour', observation_time) = date_trunc('hour', starttime)
+where conditions is not null
+group by 1 order by 2 desc;
+
+```
+
+#### Drop and Undrop a Table:  
+
+Voyons d’abord comment restaurer des objets de données qui ont été supprimés accidentellement ou intentionnellement.  
+
+```
+drop table json_weather_data;
+
+```
+
+Vérifiez que la table est correctement supprimée:  
+
+```
+select * from json_weather_data limit 10;
+
+```
+
+Restorez la table:  
+
+```
+undrop table json_weather_data;
+
+```
+
+
+#### Roll Back a Table:  
+
+Exécutez la commande suivante qui remplace tous les noms de stations du tableau par le mot "oups"
+
+```
+update trips set start_station_name = 'oops';
+
+```
+
+```
+select * from start_station_name;
+
+```
+
+Exécutez maintenant une requête qui renvoie les 20 premières stations par nombre de trajets - remarquez à quel point nous avons foiré les noms des stations afin que nous n'obtenions qu'une seule ligne :  
+
+
+```
+select
+start_station_name as "station",
+count(*) as "rides"
+from trips
+group by 1
+order by 2 desc
+limit 20;
+```
+
+Normalement, nous devrions nous débrouiller et espérer avoir une sauvegarde qui traîne. Mais dans Snowflake, nous pouvons simplement exécuter des commandes pour trouver l'ID de requête de la dernière commande UPDATE et le stocker dans une variable appelée $QUERY_ID.
+
+
+```
+set query_id =
+(select query_id from
+table(information_schema.query_history_by_session (result_limit=>5))
+where query_text like 'update%' order by start_time limit 1);
+```
+
+Recréez ensuite la table telle qu'elle était avant la mise à jour :  
+
+```
+create or replace table trips as
+(select * from trips before (statement => $query_id));
+```
+
+Exécutez à nouveau l'instruction SELECT pour vérifier que les noms des stations ont été restaurés :  
+
+```
+select
+start_station_name as "station",
+count(*) as "rides"
+from trips
+group by 1
+order by 2 desc
+limit 20;
+
+```
