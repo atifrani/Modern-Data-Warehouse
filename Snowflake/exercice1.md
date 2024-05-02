@@ -448,28 +448,34 @@ select * from json_weather_data limit 10;
 
 #### Créer une vue et interroger des données semi-structurées:  
 
-créez une vue des données météorologiques JSON non structurées dans une vue en colonnes afin qu'il soit plus facile à comprendre et à interroger pour les analystes. Pour information : l'identifiant de la ville de New York est 5128638.  
+créez une vue des données météorologiques JSON non structurées dans une vue en colonnes afin qu'il soit plus facile à comprendre et à interroger pour les analystes. 
 
 ```
 create view json_weather_data_view as
-select
- v:time::timestamp as observation_time,
- v:city.id::int as city_id,
- v:city.name::string as city_name,
- v:city.country::string as country,
- v:city.coord.lat::float as city_lat,
- v:city.coord.lon::float as city_lon,
- v:clouds.all::int as clouds,
- (v:main.temp::float)-273.15 as temp_avg,
- (v:main.temp_min::float)-273.15 as temp_min,
- (v:main.temp_max::float)-273.15 as temp_max,
- v:weather[0].main::string as weather,
- v:weather[0].description::string as weather_desc,
- v:weather[0].icon::string as weather_icon,
- v:wind.deg::float as wind_dir,
- v:wind.speed::float as wind_speed
-from json_weather_data
-where city_id = 5128638;
+select v[1]:"coco" as coco,
+        v[1]:"country" as country,
+        v[1]:"dwpt" as dwpt,
+        v[1]:"elevation" as elevation,
+        v[1]:"icao" as icao,
+        v[1]:"latitude" as latitude,
+        v[1]:"longitude" as longitude,
+        v[1]:"name" as name,
+        v[1]:"obsTime" as obsTime,
+        v[1]:"prcp" as prcp,
+        v[1]:"pres" as pres,
+        v[1]:"region" as region,
+        v[1]:"rhum" as rhum,
+        v[1]:"snow" as snow,
+        v[1]:"station" as station,
+        v[1]:"temp" as temp,
+        v[1]:"timezone" as timezone,
+        v[1]:"tsun" as tsun,
+        v[1]:"wdir" as wdir,
+        v[1]:"weatherCondition" as wheatherCondition,
+        v[1]:"wmo" as wmo,
+        v[1]:"wpgt" as wpgt,
+        v[1]:"wspd" as wspd
+from json_weather_data;
 ```
 
 #### Exécutez la requête suivantes sur le View:  
