@@ -407,7 +407,7 @@ Lorsque les données sont chargées dans Snowflake, Snowflake réorganise ces do
 Snowflake gère tous les aspects du stockage de ces données : l’organisation, la taille des fichiers, la structure, la compression, les métadonnées, les statistiques, etc. Les objets de données stockés par Snowflake ne sont ni directement visibles ni directement accessibles par les clients. Ils ne sont accessibles que par des opérations de requête SQL exécutées avec Snowflake.  
 
 #### Traitement des requêtes:
-L’exécution de la requête s’effectue dans la couche de traitement. Snowflake traite les requêtes à l’aide « d’entrepôts virtuels ». Chaque entrepôt virtuel est une grappe de calcul à traitement massivement parallèle (MPP) composée de plusieurs nœuds de calcul alloués par Snowflake à partir d’un fournisseur Cloud.  
+L’exécution de la requête s’effectue dans la couche de traitement. Snowflake traite les requêtes à l’aide « d’entrepôts virtuels ». Chaque entrepôt virtuel est une grappe de calcul à traitement massivement parallèle processing (MPP) composée de plusieurs nœuds de calcul alloués par Snowflake à partir d’un fournisseur Cloud.  
 
 Chaque entrepôt virtuel est une grappe de calcul indépendante qui ne partage aucune ressource de calcul avec d’autres entrepôts virtuels. Par conséquent, chaque entrepôt virtuel n’a aucune conséquence sur les performances des autres entrepôts virtuels.  
 
