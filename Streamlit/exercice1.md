@@ -200,3 +200,88 @@ if st.checkbox("Correlation Plot with Annotation[Seaborn]"):
 	st.write(sns.heatmap(df.corr(),annot=True))
 	st.pyplot()
 ```
+
+## Se connecter a Snowflake avec Connecteur pour Python
+Snowflake Connector pour Python doit être installé:   
+```
+pip install snowflake-connector-python.
+```
+Mettez à jours les information de connexion à snowflake.
+
+Allez sur votre terminal et exécuter votre programme:  
+```
+python app.py.
+```
+
+
+
+```
+import streamlit as st
+from snowflake.snowpark.context import get_active_session
+
+# Write directly to the app
+st.title("Example Streamlit App :balloon:")
+st.write(
+    """This application show dashboard of number of trips by station name
+    """
+)
+
+# Get the current credentials
+session = get_active_session()
+
+# execute sql statement
+sql = f"select start_station_name, count(*) nbtrips from CITIBIKE.PUBLIC.TRIPS group by start_station_name"
+data = session.sql(sql).collect()
+
+# Execute the query and convert it into a Pandas dataframe
+#queried_data = data.to_pandas()
+
+# Create a simple bar chart
+# See docs.streamlit.io for more types of charts
+st.subheader("Number of high-fives")
+st.bar_chart(data=data, x="START_STATION_NAME", y="NBTRIPS")
+
+st.subheader("Underlying data")
+st.dataframe(data, use_container_width=True)
+
+```
+
+## Ajout d'un slider pour l'interactivité:
+```
+# Import python packages
+import streamlit as st
+from snowflake.snowpark.context import get_active_session
+
+# Write directly to the app
+st.title("Example Streamlit App :balloon:")
+st.write(
+    """This application show dashboard of number of trips by station name
+    """
+)
+
+# Get the current credentials
+session = get_active_session()
+
+# Use an interactive slider to get user input
+num_station = st.slider(
+    "Number of station",
+    min_value=10,
+    max_value=100,
+    value=50,
+    help="Use this to enter the number of high-fives you gave in Q3",
+)
+# execute sql statement
+sql = f"select start_station_name, count(*) nbtrips from CITIBIKE.PUBLIC.TRIPS group by start_station_name limit "  + str(num_station)
+data = session.sql(sql).collect()
+
+# Execute the query and convert it into a Pandas dataframe
+#queried_data = data.to_pandas()
+
+# Create a simple bar chart
+# See docs.streamlit.io for more types of charts
+st.subheader("Number of high-fives")
+st.bar_chart(data=data, x="START_STATION_NAME", y="NBTRIPS")
+
+st.subheader("Underlying data")
+st.dataframe(data, use_container_width=True)
+```

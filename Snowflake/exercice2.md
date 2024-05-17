@@ -11,7 +11,36 @@ L'image ci-dessous illustre comment créer des pipelines de données continus av
 
 ![snowflake continous pipeline](../images/continous-pipeline.png)  
 
-Les Streams et les tasks sont des fonctionnalités qui vous permettent de créer des pipelines de données et de transformer Snowflake en un moteur  transformation de données agile en plus d’un puissant entrepôt de données.  
+## Qu’est-ce que Snowpipe ?
+
+* Permet le chargement une fois qu'un fichier apparaît dans un bucket.  
+* Si les données doivent être disponibles immédiatement pour analyse.  
+* Snowpipe utilise des fonctionnalités Serveless (exemple AWS SQS) en plus du virtual warehouses.  
+
+## Qu’est-ce que les streams et tasks ?
+
+Les Streams et les tasks sont des fonctionnalités qui vous permettent de créer des pipelines de données et de transformer Snowflake en un moteur transformation de données agile en plus d’un puissant entrepôt de données.  
+
+* les tasks peuvent être utilisées pour planifier des instructions SQL.  
+
+## Snowflake Storage integration:
+
+Une intégration de stockage **(Storage integration)** est un objet Snowflake qui stocke les informations d'identification et d'accès (IAM) pour votre stockage Cloud externe, ainsi qu’un ensemble facultatif d’emplacements de stockage autorisés ou bloqués (Amazon S3, Google Cloud Storage ou Microsoft Azure).
+
+* Syntaxe:  https://docs.snowflake.com/fr/sql-reference/sql/create-storage-integration 
+
+```
+CREATE [ OR REPLACE ] STORAGE INTEGRATION [IF NOT EXISTS]
+  <name>
+  TYPE = EXTERNAL_STAGE
+  cloudProviderParams
+  ENABLED = { TRUE | FALSE }
+  STORAGE_ALLOWED_LOCATIONS = ('<cloud>://<bucket>/<path>/' [ , '<cloud>://<bucket>/<path>/' ... ] )
+  [ STORAGE_BLOCKED_LOCATIONS = ('<cloud>://<bucket>/<path>/' [ , '<cloud>://<bucket>/<path>/' ... ] ) ]
+  [ COMMENT = '<string_literal>' ]
+```
+
+Un rôle  et un strategie IAM sont nécessaires pour exécuter cette commande SQL.
 
 
 ## Configuration de l'accès sécurisé à Amazon S3:  
@@ -45,434 +74,582 @@ Vous avez pas besoin de créer votre propre bucket S3. Le bucket qui sera utilis
 
 * Create a Cloud Storage Integration in Snowflake.   
 
-1. Switch Context:  
+1. Create the database and grant access to the new role create :
+```
+CREATE DATABASE IF NOT EXISTS MANAGE_DB;
+```
+
+Switch Context:
+```
+USE MANAGE_DB.PUBLIC;
+USE WAREHOUSE DATAPIPELINES_WH;
+```
+
+2. Switch Context:  
 ```
 USE ROLE ACCOUNTADMIN;
 ```
-2. Create the Warehouse:  
+3. Create the Warehouse:  
 ```
 CREATE WAREHOUSE IF NOT EXISTS DATAPIPELINES_WH
     WITH WAREHOUSE_SIZE = 'XSMALL' 
     AUTO_SUSPEND = 60 
     AUTO_RESUME = TRUE;
 ```
-
-3. Create the database and grant access to the new role create :
-```
-CREATE DATABASE IF NOT EXISTS CITIBIKE_PIPELINES;
-```
-
-4. Switch Context:
-```
-USE CITIBIKE_PIPELINES.PUBLIC;
-USE WAREHOUSE DATAPIPELINES_WH;
-```
-
-5. Create the table for Trips:  
-```
-CREATE OR REPLACE TABLE TRIPS
-(tripduration integer,
-  starttime timestamp,
-  stoptime timestamp,
-  start_station_id integer,
-  start_station_name string,
-  start_station_latitude float,
-  start_station_longitude float,
-  end_station_id integer,
-  end_station_name string,
-  end_station_latitude float,
-  end_station_longitude float,
-  bikeid integer,
-  membership_type string,
-  usertype string,
-  birth_year integer,
-  gender integer);
-```
-6. Create the stage with the S3 bucket:
-```
-CREATE or replace STAGE CITIBIKE_PIPELINES.PUBLIC.citibike_trips URL = 's3://logbrain-datalake/citibike/';  
-
-list @citibike_trips;  
-```
-7. Define the file format:
-```
-create or replace FILE FORMAT CITIBIKE_PIPELINES.PUBLIC.CSV 
-    COMPRESSION = 'AUTO' 
-    FIELD_DELIMITER = ',' 
-    RECORD_DELIMITER = '\n' 
-    SKIP_HEADER = 0 
-    FIELD_OPTIONALLY_ENCLOSED_BY = '\042' 
-    TRIM_SPACE = FALSE 
-    ERROR_ON_COLUMN_COUNT_MISMATCH = TRUE 
-    ESCAPE = 'NONE' 
-    ESCAPE_UNENCLOSED_FIELD = '\134' 
-    DATE_FORMAT = 'AUTO' 
-    TIMESTAMP_FORMAT = 'AUTO' 
-    NULL_IF = ('');
-```
-
-8. Load data into the table:  
-```
-copy into trips from @citibike_trips file_format=CSV;
-
-Select * from TRIPS limit 10;
-```
-
-9. Truncate table TRIPS:
+4. Create Cloud Storage Integration:  
 
 ```
-truncate table TRIPS;
-
-Select * from TRIPS limit 10;
-```
-
-
-
-10. Set the context for worksheet :
-
-```
-USE ROLE ACCOUNTADMIN;
-USE CITIBIKE_PIPELINES.PUBLIC;
-USE WAREHOUSE DATAPIPELINES_WH;
-```
-
-11. Create Cloud Storage Integration:  
-
-```
-create or replace storage integration citibike_snowpipe_integration
+create or replace storage integration s3int
 type = external_stage
 storage_provider = s3
 enabled = true
-storage_aws_role_arn = 'arn:aws:iam::220286917992:role/logbrain-private-datalake-role'
-storage_allowed_locations = ('s3://logbrain-private-datalake/citibike_snowpipe/');
+storage_aws_role_arn = 'arn:aws:iam:xxxx
+storage_allowed_locations = ('s3://bucketname/');
 ```
 
 -- Récupérez l'utilisateur AWS IAM pour votre compte Snowflake et enregistrez les valeurs suivantes à partir de l'instruction SQL ci-dessous :     
 -- STORAGE_AWS_IAM_USER_ARN   
 -- STORAGE_AWS_EXTERNAL_ID   
 
-12. Describe the storage integration: 
+5. Describe the storage integration: 
 
 ```
 DESC INTEGRATION citibike_snowpipe_integration;
 ```
 
--- 1.7.1 Creating an External Stage. 
-
+6. Create table first
 ```
-create or replace stage streaming_data
-  url = 's3://logbrain-private-datalake/citibike_snowpipe/'
-  storage_integration = citibike_snowpipe_integration
-  file_format=(type=json);
+CREATE OR REPLACE TABLE MANAGE_DB.PUBLIC.movie_titles (
+  show_id STRING,
+  type STRING,
+  title STRING,
+  director STRING,
+  cast STRING,
+  country STRING,
+  date_added STRING,
+  release_year STRING,
+  rating STRING,
+  duration STRING,
+  listed_in STRING,
+  description STRING )
 ```
-
-13. List stages:  
+7. Create file format object
 ```
-show stages like '%STREAMING%';
+CREATE OR REPLACE file format MANAGE_DB.file_formats.csv_fileformat
+    type = csv
+    field_delimiter = ','
+    skip_header = 1
+    null_if = ('NULL','null')
+    empty_field_as_null = TRUE;
 ```
- ## Snowpipe:
-
-Cette section décrit l'option la plus courante pour déclencher les chargements de données Snowpipe.
-automatiquement à l'aide des notifications Amazon SQS (Simple Queue Service) pour un compartiment S3.  
-Le diagramme suivant montre le flux du processus d'ingestion automatique de Snowpipe :  
-
-![snowflake continous pipeline](../images/snowpipe.png)  
-
-1. Les fichiers de données sont chargés dans le stage.  
-2. Une notification d'événement S3 informe Snowpipe via une file d'attente SQS que les fichiers sont prêts à être transférés. Snowpipe copie les fichiers dans une file d'attente.  
-3. Un entrepôt virtuel fourni par Snowflake charge les données des fichiers en file d'attente dans la cible
-table basée sur les paramètres définis dans le pipe spécifié.  
-
-14. Create a table that Snowpipe will use to write the incoming data:  
-
-```
-create or replace table trips_raw (v variant);
-```
-
-15. Create a SNOW PIPE definition:
-```
-create or replace pipe trips_pipe auto_ingest=true as copy into trips_raw from @streaming_data/;
+    
+ 8. Create stage object with integration object & file format object
+ ```
+CREATE OR REPLACE stage MANAGE_DB.external_stages.csv_folder
+    URL = 's3://<your-bucket-name>/<your-path>/'
+    STORAGE_INTEGRATION = s3_int
+    FILE_FORMAT = MANAGE_DB.file_formats.csv_fileformat
 ```
 
-16. Review the Snow pipe definition and make a note of the notification channel value.  
+9. Use Copy command   
+```    
+COPY INTO MANAGE_DB.PUBLIC.movie_titles
+    FROM @MANAGE_DB.external_stages.csv_folder
+``` 
+    
+10. Create file format object
+```
+CREATE OR REPLACE file format MANAGE_DB.file_formats.csv_fileformat
+    type = csv
+    field_delimiter = ','
+    skip_header = 1
+    null_if = ('NULL','null')
+    empty_field_as_null = TRUE    
+    FIELD_OPTIONALLY_ENCLOSED_BY = '"'    
+      
+SELECT * FROM MANAGE_DB.PUBLIC.movie_titles
+```
+    
+## Snowpipe:
+
+1. Create table first
+```
+CREATE OR REPLACE TABLE MANAGE_DB.PUBLIC.employees (
+  id INT,
+  first_name STRING,
+  last_name STRING,
+  email STRING,
+  location STRING,
+  department STRING
+  )
+```
+    
+2.Create file format object
+```
+CREATE OR REPLACE file format MANAGE_DB.file_formats.csv_fileformat
+    type = csv
+    field_delimiter = ','
+    skip_header = 1
+    null_if = ('NULL','null')
+    empty_field_as_null = TRUE;
+```
+    
+    
+ 3. Create stage object with integration object & file format object
+ ```
+CREATE OR REPLACE stage MANAGE_DB.external_stages.csv_folder
+    URL = 's3://snowflakes3bucket123/csv/snowpipe'
+    STORAGE_INTEGRATION = s3_int
+    FILE_FORMAT = MANAGE_DB.file_formats.csv_fileformat
+```
+
+ 4. Create stage object with integration object & file format object
+ ```
+LIST @MANAGE_DB.external_stages.csv_folder  
+```
+
+5. Create schema to keep things organized
+```
+CREATE OR REPLACE SCHEMA MANAGE_DB.pipes
+```
+
+6. Define pipe
+```
+CREATE OR REPLACE pipe MANAGE_DB.pipes.employee_pipe
+auto_ingest = TRUE
+AS
+COPY INTO MANAGE_DB.PUBLIC.employees
+FROM @MANAGE_DB.external_stages.csv_folder  
+```
+
+7. Describe pipe
+```
+DESC pipe employee_pipe
+```
+```
+SELECT * FROM MANAGE_DB.PUBLIC.employees    
+```
+
+8. Configure notification:  
+
+Review the Snowpipe definition and make a note of the notification channel value.   
 
 ```
 show pipes;
 ```
 
+Copy the SQS notification Arn to the bucket notification sqs arn ** auto_ingest_snowflake  **.  
 
-Copy the SQS notification Arn to the bucket notification sqs arn ** auto_ingest_sniowflake  **.
-
-17. Create and Call the Stored procedure that generates data files:  
-
-A partir du fichier Stored_Procedures.sql, copiez collez le code sql et exécutez le pour créer les 2 procédure sql.  
-
-To call the steam_data procedure, run the following command:   
+9. Manage pipes:
 
 ```
-call stream_data('2018-01-01', '2018-01-01');
+DESC pipe MANAGE_DB.pipes.employee_pipe;
+
+SHOW PIPES;
+
+SHOW PIPES like '%employee%'
+
+SHOW PIPES in database MANAGE_DB
+
+SHOW PIPES in schema MANAGE_DB.pipes
+
+SHOW PIPES like '%employee%' in Database MANAGE_DB
 ```
 
-18. Verify if there are any files already in the bucket/folder/ 
 
-```
-list @streaming_data;
-```
+## TASKS:
 
-Revoir le contenu dU stage externe:    
+1. create new database
 ```
-select $1 from @streaming_data limit 100;
-
+CREATE OR REPLACE TRANSIENT DATABASE TASK_DB;
 ```
 
-19. Check the status of the pipe.  
+2.Prepare table
+```
+CREATE OR REPLACE TABLE CUSTOMERS (
+    CUSTOMER_ID INT AUTOINCREMENT START = 1 INCREMENT =1,
+    FIRST_NAME VARCHAR(40) DEFAULT 'JENNIFER' ,
+    CREATE_DATE DATE)
+    
+ ```   
+3. Create task
+```
+CREATE OR REPLACE TASK CUSTOMER_INSERT
+    WAREHOUSE = COMPUTE_WH
+    SCHEDULE = '1 MINUTE'
+    AS 
+    INSERT INTO CUSTOMERS(CREATE_DATE) VALUES(CURRENT_TIMESTAMP);
+ ```   
+```
+SHOW TASKS;
+```
+4. Task starting and suspending
+```
+ALTER TASK CUSTOMER_INSERT RESUME;
+ALTER TASK CUSTOMER_INSERT SUSPEND;
+
+
+SELECT * FROM CUSTOMERS
+```
 
 ```
-select system$pipe_status('trips_pipe');
+CREATE OR REPLACE TASK CUSTOMER_INSERT
+    WAREHOUSE = COMPUTE_WH
+    SCHEDULE = '60 MINUTE'
+    AS 
+    INSERT INTO CUSTOMERS(CREATE_DATE) VALUES(CURRENT_TIMESTAMP);
 ```
-
-20. Check if the data is loaded to the trips_raw table.  
+  
+  
+```
+CREATE OR REPLACE TASK CUSTOMER_INSERT
+    WAREHOUSE = COMPUTE_WH
+    SCHEDULE = 'USING CRON 0 7,10 * * * UTC'
+    AS 
+    INSERT INTO CUSTOMERS(CREATE_DATE) VALUES(CURRENT_TIMESTAMP);
 ``` 
-select count(*) from trips_raw;
-```
 
-21. Review sample data from trips_raw table. 
-```
-select * from trips_raw limit 100;
-```
-
-22. Clean up the stage by calling the purge_files function.  
-```
-call purge_files('trips_raw', '@streaming_data/');
-```
-
-22. Truncate raw table
-```
-truncate table trips_raw;
-```
-
-23. Create Streams for trips and stations.  
-```
-create or replace stream stream_trips on table citibike_pipelines.public.trips_raw;
-
-create or replace stream stream_stations on table citibike_pipelines.public.trips_raw;
-
-show streams;
-
-```
-
-24. Load 1 day of data to test the streams.
-call stream_data('2018-01-01', '2018-01-01');
-
-25. Show the contents of the stage.  
-```
-list @streaming_data;
-
-select $1 from @streaming_data limit 100;
-```
-26. Check the status of the pipe and watch for file create events
-```
-select system$pipe_status('trips_pipe');
-```
-
-27. Snowpipe copies the data into the raw table and the insertions are tracked in the stream.
-```
-select count(*) from citibike_pipelines.public.trips_raw;
-
-select * from citibike_pipelines.public.trips_raw limit 100;
-```
-```
-select count(*) from stream_trips;
-
-select * from stream_trips limit 100;
-```
-28. reate tables to store the data processed by the Streams.  
-```
-create or replace table bike_trips (
-  tripduration integer,
-  starttime timestamp_ntz,
-  stoptime timestamp_ntz,
-  start_station_id integer,
-  end_station_id integer,
-  bikeid integer,
-  usertype string
-);
-```
-```
-create or replace table bike_stations (
-  station_id integer,
-  station_name string,
-  station_latitude float,
-  station_longitude float,
-  station_comment string
-);
-```
-
-29. Create the push_trips task to read JSON data in the streams_trips stream and load to bike_trips.  
-
-```
-create or replace task push_trips 
-warehouse = DATAPIPELINES_WH
-schedule = '1 minute'
-when system$stream_has_data('stream_trips')
-as
-insert into bike_trips
-  select v:tripduration::integer,
-  v:starttime::timestamp_ntz,
-  v:stoptime::timestamp_ntz,
-  v:start_station_id::integer,
-  v:end_station_id::integer,
-  v:bikeid::integer,
-  v:usertype::string
-  from stream_trips;
-```
-
-30. Create a task to perform a merge into the bike_stations table.  
-```
-create or replace task push_stations 
-warehouse = DATAPIPELINES_WH
-schedule = '1 minute'
-when system$stream_has_data('stream_stations')
-as
-merge into bike_stations s
-  using (
-    select v:start_station_id::integer station_id,
-      v:start_station_name::string station_name,
-      v:start_station_latitude::float station_latitude,
-      v:start_station_longitude::float station_longitude,
-      'Station at ' || v:start_station_name::string station_comment
-    from stream_stations
-    union
-    select v:end_station_id::integer station_id,
-      v:end_station_name::string station_name,
-      v:end_station_latitude::float station_latitude,
-      v:end_station_longitude::float station_longitude,
-      'Station at ' || v:end_station_name::string station_comment
-    from stream_stations) ns
-  on s.station_id = ns.station_id
-  when not matched then
-    insert (station_id, station_name, station_latitude, station_longitude, station_comment)
-    values (ns.station_id, ns.station_name, ns.station_latitude, ns.station_longitude, ns.station_comment);
-```
-30. Define a TASK to call the purge_files procedure AFTER the push_trips TASK runs.  
-
-```
-create or replace task purge_files 
-warehouse = DATAPIPELINES_WH
-after push_trips
-as
-  call purge_files('trips_raw', '@streaming_data/');
-```
-
-31. Activate the tasks that were just created.
-```
-alter task purge_files resume;
-alter task push_trips resume;
-alter task push_stations resume;
-
-show tasks;
-```
-32. Verify data loaded from streams to the tables.
-```
-select count(*) from citibike_pipelines.public.bike_trips; 
-
-select count(*) from citibike_pipelines.public.bike_stations;
-```
-
-33. Call the stream_data procedure to drop files into the STAGE for couple of days 
-
-```
-call stream_data('2018-01-03', '2018-01-04');
-```
-
-34. Show the details of each of the tasks over the last five minutes.
-```
-select * from table(information_schema.task_history())
-  where scheduled_time > dateadd(minute, -5, current_time())
-  and state <> 'SCHEDULED'
-  order by completed_time desc;
-```
-
-35. How long until the next task runs?  
-```
-select timestampdiff(second, current_timestamp, scheduled_time) next_run, scheduled_time, name, state
-  from table(information_schema.task_history())
-  where state = 'SCHEDULED' order by completed_time desc;
-```
+# __________ minute (0-59)
+# | ________ hour (0-23)
+# | | ______ day of month (1-31, or L)
+# | | | ____ month (1-12, JAN-DEC)
+# | | | | __ day of week (0-6, SUN-SAT, or L)
+# | | | | |
+# | | | | |
+# * * * * *
 
 
-36. How many files have been processed by the pipeline in the last hour?
-
-```
-select count(*)
-from table(information_schema.copy_history(
-  table_name=>'citibike_pipelines.public.trips_raw',
-  start_time=>dateadd(hour, -1, current_timestamp)));
-```
-
-37. query to get an overview of the pipeline including: time to next task run, the number of files in the bucket,   
--- number of files pending for loading, total number of files processed in the last hour, and record count metrics.  
--- across all the tables referenced in these labs.  
-
-```
-select
-  (select min(timestampdiff(second, current_timestamp, scheduled_time))
-    from table(information_schema.task_history())
-    where state = 'SCHEDULED' order by completed_time desc) time_to_next_pulse,
-  (select count(distinct metadata$filename) from @streaming_data/) files_in_bucket,
-  (select parse_json(system$pipe_status('citibike_pipelines.public.trips_pipe')):pendingFileCount::number) pending_file_count,
-  (select count(*)
-    from table(information_schema.copy_history(
-    table_name=>'citibike_pipelines.public.trips_raw',
-    start_time=>dateadd(hour, -1, current_timestamp)))) files_processed,
-  (select count(*) from citibike_pipelines.public.trips_raw) trips_raw,
-  (select count(*) from citibike_pipelines.public.stream_trips) recs_in_stream,
-  (select count(*) from citibike_pipelines.public.bike_trips) bike_trips,
-  (select count(*) from citibike_pipelines.public.bike_stations) bike_stations,
-  (select max(starttime) from citibike_pipelines.public.trips) max_date;
-```
-
-38.  Suspend the tasks using the below queries.
-```
-alter task push_stations suspend;
-alter task push_trips suspend;
-alter task purge_files suspend;
-```
-
-39.  remove the tasks using the below queries.  
-
-```
-drop task push_stations ;
-drop task push_trips ;
-drop task purge_files ;
-```
-
-40.  remove the streams using the below queries.  
-
-```
-drop task stream_stations ;
-drop task stream_trips ;
-```
 
 
-41.  remove the procedures using the below queries.  
+5. Every minute
+``` 
+SCHEDULE = 'USING CRON * * * * * UTC'
+``` 
+
+6. Every day at 6am UTC timezone
+``` 
+SCHEDULE = 'USING CRON 0 6 * * * UTC'
+``` 
+7. Every hour starting at 9 AM and ending at 5 PM on Sundays 
+``` 
+SCHEDULE = 'USING CRON 0 9-17 * * SUN America/Los_Angeles'
+``` 
+
+``` 
+CREATE OR REPLACE TASK CUSTOMER_INSERT
+    WAREHOUSE = COMPUTE_WH
+    SCHEDULE = 'USING CRON 0 9,17 * * * UTC'
+    AS 
+    INSERT INTO CUSTOMERS(CREATE_DATE) VALUES(CURRENT_TIMESTAMP);
+``` 
+
+8. Creating trees of tasks:
+``` 
+USE TASK_DB;
+ 
+SHOW TASKS;
+
+SELECT * FROM CUSTOMERS;
+``` 
+9. Prepare a second table
+``` 
+CREATE OR REPLACE TABLE CUSTOMERS2 (
+    CUSTOMER_ID INT,
+    FIRST_NAME VARCHAR(40),
+    CREATE_DATE DATE)
+```  
+    
+10. Suspend parent task
+``` 
+ALTER TASK CUSTOMER_INSERT SUSPEND;
+``` 
+
+11. Create a child task
+``` 
+CREATE OR REPLACE TASK CUSTOMER_INSERT2
+    WAREHOUSE = COMPUTE_WH
+    AFTER CUSTOMER_INSERT
+    AS 
+    INSERT INTO CUSTOMERS2 SELECT * FROM CUSTOMERS;
+```     
+    
+12. Prepare a third table
+``` 
+CREATE OR REPLACE TABLE CUSTOMERS3 (
+    CUSTOMER_ID INT,
+    FIRST_NAME VARCHAR(40),
+    CREATE_DATE DATE,
+    INSERT_DATE DATE DEFAULT DATE(CURRENT_TIMESTAMP))    
+```   
+
+13. Create a child task
+``` 
+CREATE OR REPLACE TASK CUSTOMER_INSERT3
+    WAREHOUSE = COMPUTE_WH
+    AFTER CUSTOMER_INSERT2
+    AS 
+    INSERT INTO CUSTOMERS3 (CUSTOMER_ID,FIRST_NAME,CREATE_DATE) SELECT * FROM CUSTOMERS2;
+``` 
+
+``` 
+SHOW TASKS;
+
+ALTER TASK CUSTOMER_INSERT 
+SET SCHEDULE = '1 MINUTE'
+``` 
+13. Resume tasks (first root task)
+``` 
+ALTER TASK CUSTOMER_INSERT RESUME;
+ALTER TASK CUSTOMER_INSERT2 RESUME;
+ALTER TASK CUSTOMER_INSERT3 RESUME;
+``` 
+``` 
+SELECT * FROM CUSTOMERS2
+
+SELECT * FROM CUSTOMERS3
+``` 
+14. Suspend tasks again
+``` 
+ALTER TASK CUSTOMER_INSERT SUSPEND;
+ALTER TASK CUSTOMER_INSERT2 SUSPEND;
+ALTER TASK CUSTOMER_INSERT3 SUSPEND;
+
+``` 
+## Streams: INSERT
+```
+CREATE OR REPLACE TRANSIENT DATABASE STREAMS_DB;
+```
+
+1. Create example table
+``` 
+create or replace table sales_raw_staging(
+  id varchar,
+  product varchar,
+  price varchar,
+  amount varchar,
+  store_id varchar);
 
 ```
-drop procedure purge_files ;
-drop procedure stream_data ;
+2. insert values 
+```
+insert into sales_raw_staging 
+    values
+        (1,'Banana',1.99,1,1),
+        (2,'Lemon',0.99,1,1),
+        (3,'Apple',1.79,1,2),
+        (4,'Orange Juice',1.89,1,2),
+        (5,'Cereals',5.98,2,1);  
+```
+```
+create or replace table store_table(
+  store_id number,
+  location varchar,
+  employees number);
+```
+```
+INSERT INTO STORE_TABLE VALUES(1,'Chicago',33);
+INSERT INTO STORE_TABLE VALUES(2,'London',12);
 ```
 
-42.  remove the stage using the below queries.  
+```
+create or replace table sales_final_table(
+  id int,
+  product varchar,
+  price number,
+  amount int,
+  store_id int,
+  location varchar,
+  employees int);
+```
+3. Insert into final table  
+```
+INSERT INTO sales_final_table 
+    SELECT 
+    SA.id,
+    SA.product,
+    SA.price,
+    SA.amount,
+    ST.STORE_ID,
+    ST.LOCATION, 
+    ST.EMPLOYEES 
+    FROM SALES_RAW_STAGING SA
+    JOIN STORE_TABLE ST ON ST.STORE_ID=SA.STORE_ID ;
+```
+
+4. Create a stream object
+```
+create or replace stream sales_stream on table sales_raw_staging;
+```
+```
+SHOW STREAMS;
+
+DESC STREAM sales_stream;
+```
+
+5. Get changes on data using stream (INSERTS)
+```
+select * from sales_stream;
+
+select * from sales_raw_staging;
+
+```     
+                                 
+
+6. insert values 
+```
+insert into sales_raw_staging  
+    values
+        (6,'Mango',1.99,1,2),
+        (7,'Garlic',0.99,1,1);
+```      
+
+7. Get changes on data using stream (INSERTS)
+```
+select * from sales_stream;
+
+select * from sales_raw_staging;
+                
+select * from sales_final_table;        
+```
+
+9. Consume stream object
+```
+INSERT INTO sales_final_table 
+    SELECT 
+    SA.id,
+    SA.product,
+    SA.price,
+    SA.amount,
+    ST.STORE_ID,
+    ST.LOCATION, 
+    ST.EMPLOYEES 
+    FROM SALES_STREAM SA
+    JOIN STORE_TABLE ST ON ST.STORE_ID=SA.STORE_ID ;
+```
+
+10. Get changes on data using stream (INSERTS)
+```
+select * from sales_stream;
 
 ```
-drop stage streaming_data ;
+
+
+11. insert values 
+```
+insert into sales_raw_staging  
+    values
+        (8,'Paprika',4.99,1,2),
+        (9,'Tomato',3.99,1,2);
+```     
+        
+12.Consume stream object
+```
+INSERT INTO sales_final_table 
+    SELECT 
+    SA.id,
+    SA.product,
+    SA.price,
+    SA.amount,
+    ST.STORE_ID,
+    ST.LOCATION, 
+    ST.EMPLOYEES 
+    FROM SALES_STREAM SA
+    JOIN STORE_TABLE ST ON ST.STORE_ID=SA.STORE_ID ;
+ ```      
+
+```              
+SELECT * FROM SALES_FINAL_TABLE;        
+
+SELECT * FROM SALES_RAW_STAGING;     
+        
+SELECT * FROM SALES_STREAM;
 ```
 
-42.  remove the table using the below queries.  
+## Streams: UPDATE
+
+1. udpate source tables
+```
+SELECT * FROM SALES_RAW_STAGING;     
+        
+SELECT * FROM SALES_STREAM;
+
+UPDATE SALES_RAW_STAGING
+SET PRODUCT ='Potato' WHERE PRODUCT = 'Banana'
+```
+
+2. udpate source tables
+```
+merge into SALES_FINAL_TABLE F      -- Target table to merge changes from source table
+using SALES_STREAM S                -- Stream that has captured the changes
+   on  f.id = s.id                 
+when matched 
+    and S.METADATA$ACTION ='INSERT'
+    and S.METADATA$ISUPDATE ='TRUE'        -- Indicates the record has been updated 
+    then update 
+    set f.product = s.product,
+        f.price = s.price,
+        f.amount= s.amount,
+        f.store_id=s.store_id;
+```
+```
+SELECT * FROM SALES_FINAL_TABLE
+
+SELECT * FROM SALES_RAW_STAGING;     
+        
+SELECT * FROM SALES_STREAM;
+```
+3. UPDATE 2:
 
 ```
-drop table trips ;
-drop table trips_raw ;
-drop table bike_stations ;
-drop table bike_trips ;
+UPDATE SALES_RAW_STAGING
+SET PRODUCT ='Green apple' WHERE PRODUCT = 'Apple';
+
+
+merge into SALES_FINAL_TABLE F      -- Target table to merge changes from source table
+using SALES_STREAM S                -- Stream that has captured the changes
+   on  f.id = s.id                 
+when matched 
+    and S.METADATA$ACTION ='INSERT'
+    and S.METADATA$ISUPDATE ='TRUE'        -- Indicates the record has been updated 
+    then update 
+    set f.product = s.product,
+        f.price = s.price,
+        f.amount= s.amount,
+        f.store_id=s.store_id;
+
+
+SELECT * FROM SALES_FINAL_TABLE;
+
+SELECT * FROM SALES_RAW_STAGING;     
+        
+SELECT * FROM SALES_STREAM;
+
 ```
+
+
+## Streams: DELETE
+        
+```      
+SELECT * FROM SALES_FINAL_TABLE
+
+SELECT * FROM SALES_RAW_STAGING;     
+        
+SELECT * FROM SALES_STREAM;    
+
+DELETE FROM SALES_RAW_STAGING
+WHERE PRODUCT = 'Lemon';
+```     
+        
+        
+        
+1. Process stream          
+
+```      
+merge into SALES_FINAL_TABLE F      -- Target table to merge changes from source table
+using SALES_STREAM S                -- Stream that has captured the changes
+   on  f.id = s.id          
+when matched 
+    and S.METADATA$ACTION ='DELETE' 
+    and S.METADATA$ISUPDATE = 'FALSE'
+    then delete               
+```     
