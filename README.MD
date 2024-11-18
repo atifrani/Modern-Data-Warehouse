@@ -6,7 +6,9 @@
 + Data and Cloud solution architect.  
 + 15 years experiences in big data and cloud computing.  
 + Big Data and cloud computing professor (ECE, ESME, MBA ESG, ESCP).  
-+ Founder of Logbrain (Consulting firm in big data and cloud computing).  
++ Founder of Logbrain (Consulting firm in big data and cloud computing).
+
+![alt text](images/axel.jpg)  
 
 ## À propos de vous:  
 + Expériences en analyse des données.  
