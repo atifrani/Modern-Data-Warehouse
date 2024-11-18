@@ -193,6 +193,11 @@ La quantité de données non structurées est bien plus importante que celle des
 
 ![alt text](images/donnenonstucture.png)
 
+
+#### Données structurées vs Données non structurées:  
+
+![alt text](images/ds-vs-dns.png)
+
 ## Introduction Data warehouse:  
 
 **Un data warehouse (DW)** est une base de données construite par copie et réorganisation
