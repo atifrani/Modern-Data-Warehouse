@@ -3,14 +3,15 @@
 
 ## À propos de votre instructeur:  
 
-+ Data and Cloud solution architect.  
-+ 15 years experiences in big data and cloud computing.  
-+ Big Data and cloud computing professor (ECE, ESME, MBA ESG, ESCP).  
-+ Founder of Logbrain (Consulting firm in big data and cloud computing).
++ Architecte solutions Data et Cloud.
++ 15 ans d'expériences en big data et cloud computing.
++ Professeur en Big Data et cloud computing (ECE, ESME, MBA ESG, ESCP).
++ Fondateur de Logbrain (Cabinet de conseil en big data et cloud computing).
 
 ![alt text](images/axel.jpg)  
 
 ## À propos de vous:  
+
 + Expériences en analyse des données.  
 + Expériences dans les technologies de Big Data.  
 + Expériences dans le cloud computing.  
