@@ -1,5 +1,62 @@
 
 # Introduction: 
+
+## À propos de votre instructeur:  
+
++ Data and Cloud solution architect.  
++ 15 years experiences in big data and cloud computing.  
++ Big Data and cloud computing professor (ECE, ESME, MBA ESG, ESCP).  
++ Founder of Logbrain (Consulting firm in big data and cloud computing).  
+
+## À propos de vous:  
++ Expériences en analyse des données.  
++ Expériences dans les technologies de Big Data.  
++ Expériences dans le cloud computing.  
+
+## Qu'est-ce que les données?  
+
+Les données sont des **éléments bruts** qui peuvent être abstraits des phénomènes mesurés et enregistrés de diverses manières.​  
+Cependant, en général, les données se réfèrent aux éléments; Extrait par observations, par calculs, par expériences, ...  
+
+Les données peuvent prendre la forme de **texte, observations, figures, images, nombres, graphiques ou symboles**. Par exemple, les données peuvent inclure des prix individuels, des poids, des adresses, des âges, des noms, des températures, des dates ou des distances.  
+
+![alt text](images/data.jpg)
+
+## Qu'est-ce que l'information?
+
+Les informations sont définies comme **des connaissances acquises par l'étude, la communication, la recherche ou l'enseignement**. Essentiellement, **l'information est le résultat de l'analyse et de l'interprétation des données**.Alors que les données sont les chiffres, les nombres ou les graphiques individuels, les informations sont la perception de ces éléments de connaissance.  
+
+Un ensemble de données pourrait inclure des lectures de température dans un emplacement sur plusieurs années. Sans aucun contexte supplémentaire, ces températures n'ont aucun sens. Cependant, lorsque vous analysez et organisez ces informations, vous pouvez déterminer les modèles de température saisonnière ou même les tendances climatiques plus larges.Ce n'est que lorsque les données sont organisées et compilées de manière utile que cela peut fournir des informations bénéfiques pour les autres.  
+
+![alt text](images/informations.jpg)
+
+## L'ère de l'information:  
+
+Depuis le début des années **2000, Internet et le Web** offrent des possibilités uniques de collecte et d’analyse de données. Avec **l’expansion du trafic Web et des boutiques en ligne**, des entreprises telles que **Yahoo, Amazon et eBay** ont commencé à analyser le comportement des clients en examinant les taux de clics, les données de localisation spécifiques à l’adresse IP et les journaux de recherche. Cela a ouvert un tout nouveau monde de possibilités.
+
+**En 2005, Roger Mougalas a baptisé Big Data un vaste ensemble de données qui, à l’époque, étaient presque impossibles à gérer et à traiter à l’aide des outils traditionnels de business intelligence disponibles**. La même année, **Hadoop**, capable de gérer **le Big Data**, a été créé. **Hadoop** était basé sur un framework logiciel **open source** appelé Nutch et a été fusionné avec MapReduce de Google.
+
+Le Big Data a révolutionné des secteurs entiers et a changé la culture et le comportement humains. Il est le résultat de l’ère de l’information et change la façon dont les gens font de l’exercice, créent de la musique et travaillent.  
+
+**Data Never Sleeps:**  
+
+Quelle est l'ampleur de votre activité en ligne ?  
+
+Le dernier graphique **« Data Never Sleeps »** de Domo nous donne une idée du temps que les gens passent désormais sur le Web.  
+Parmi les principales observations (et encore une fois, ces statistiques concernent ce qui se passe chaque minute) :  
+
+* Les utilisateurs de YouTube regardent 694 444 heures de vidéo
+* Zoom héberge 856 minutes de webinaires
+* Les utilisateurs de TikTok regardent 167 millions de clips  
+
+![alt text](images/dvs.png)
+
+L'ordinateur utilise le système binaire. 1024 a été utilisé comme multiplicateur car il est la 10e puissance de deux.  
+
+![alt text](images/size.png)
+
+## Introduction à la business intelligence:  
+
 Les responsables d’entreprises sont aujourd'hui confrontés à la nécessité de prendre des décisions toujours plus rapides, toujours plus précises et toujours plus efficaces.  
 
 Avec des stratégies adaptées et des logiciels performants, vous pouvez dès aujourd'hui prendre des décisions pilotées par les données – plus rapidement et avec une plus grande précision. On parle alors de **Business Intelligence**.  
@@ -97,6 +154,41 @@ que l'on qualifie de data marts.
 * **Restitution**: Couche constituée d'outils d'analyse ou de reporting servant d'interfaces entre les
 utilisateurs et les données des data marts.  
 
+## Introduction au Big Data:
+
+### Qu'est-ce que le Big Data ?
+Le **Big Data** est un ensemble de données qui dépassent la capacité de traitement des systèmes de bases de données classiques. Les données sont trop volumineuses, sont générées vite ou ne correspondent pas aux structures de vos architectures de base de données. Pour tirer profit de ces données, vous devez choisir une autre façon de les traiter.
+
+Le mot à la mode en informatique en **2012**, le **Big Data**, est devenu viable grâce à l'émergence d'approches rentables pour maîtriser **le volume, la vitesse et la variabilité** des données massives. Ces données contiennent des modèles et des informations précieuses, auparavant cachés en raison de la quantité de travail nécessaire pour les extraire.
+
+Pour les grandes entreprises, telles que Walmart ou Google, ce pouvoir est à la portée de tous depuis un certain temps, mais à un coût faramineux. Le matériel informatique, les architectures cloud et les logiciels open source d'aujourd'hui mettent le traitement du Big Data à la portée d'entreptises moins bien dotés en ressources informatique.
+
+![alt text](images/4v.png)
+
+* **Le volume** est la quantité de données, et il comprend les données provenant de sources traditionnelles et non traditionnelles. Par exemple, il y a aujourd'hui l'équivalent de 100 téraoctets de données téléchargées sur Facebook chaque jour. 100 téraoctets équivalent à l'espace de stockage de 33 millions de chansons.
+
+* **La vélocité** est la vitesse à laquelle les informations sont générées et circulent dans l'entreprise. Dans un monde où la croissance des données est exponentielle et accélérée;  
+
+* **La variété** est le type de données dont disposent les entreprises et leurs équipes marketing, telles que les données de capteurs, l'audio, la vidéo, les données SMS, le langage naturel, les photos, les données de flux de clics, les données complexes (données extraites d'un essaim de voitures dans une ville intelligente).
+
+* **La véracité** est le degré d'exactitude des données. Les données sont souvent considérées comme certaines et fiables. La réalité des espaces problématiques, des ensembles de données et des environnements opérationnels est que les données sont souvent incertaines, imprécises et difficiles à faire confiance (ce qui atténue l’incertitude des données).
+
+**Le marché des editeurs de solutions Big Data**  
+
+![alt text](images/providers.png)
+
+#### Qu'est-ce que les données structurées ?
+Le terme « données structurées » désigne les données qui résident dans un champ fixe au sein d'un fichier ou d'un enregistrement. Les données structurées sont généralement stockées dans une **base de données relationnelle (SGBDR)**. Elles peuvent être constituées de nombres et de texte, et leur origine peut être automatique ou manuelle, à condition qu'elles se trouvent dans une structure SGBDR. Cela dépend de la création d'un modèle de données, de la définition des types de données à inclure et de la manière de les stocker et de les traiter.  
+Le langage de programmation utilisé pour les données structurées est **SQL (Structured Query Language)**. Développé par **IBM en 1974**, SQL gère les bases de données relationnelles. Les noms, les adresses, les numéros de carte de crédit, la géolocalisation, etc. sont des exemples typiques de données structurées.
+
+![alt text](images/datastructree.png)
+
+#### Qu'est-ce que les données non structurées ?
+Les données non structurées sont plus ou moins toutes les données qui ne sont pas structurées. Même si les données non structurées peuvent avoir une structure interne native, elles ne sont pas structurées de manière prédéfinie. Il n'existe pas de modèle de données ; les données sont stockées dans leur format natif.
+Les exemples typiques de données non structurées sont les médias enrichis, le texte, l'activité sur les réseaux sociaux, les images de surveillance, etc.  
+La quantité de données non structurées est bien plus importante que celle des données structurées. Les données non structurées représentent **80 %** ou plus de toutes les données d'entreprise, et ce pourcentage ne cesse de croître. Cela signifie que les entreprises qui ne prennent pas en compte les données non structurées passent à côté de nombreuses informations commerciales précieuses.
+
+![alt text](images/donnenonstucture.png)
 
 ## Introduction Data warehouse:  
 
