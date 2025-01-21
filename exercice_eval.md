@@ -149,7 +149,7 @@ Présentation du jeux de données:
 
 |Column |                      Description  |
 |--------|-----------------------------------|  
-|company_id	The |company ID|
+|company_id | The company ID|
 |employee_count	|Number of employees at company|
 |follower_count	|Number of company followers on LinkedIn|
 |time_recorded	|Unix time of data collection|
