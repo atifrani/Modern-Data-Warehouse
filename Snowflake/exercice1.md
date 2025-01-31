@@ -15,7 +15,7 @@ Si ce n'est pas encore fait, inscrivez-vous pour un essai gratuit de Snowflake d
 * Pour le nom de l'entreprise, utilisez **MBAESG**.  
 * Pour le role, choisissez **Etudiant**.
 * L'édition Snowflake (Standard, Enterprise, Business Critical, etc.), pour ce lab choisissez **Entreprise Edition**.  
-* Les fournisseurs de cloud (AWS, Azure, GCP), pour ce lab choisissez et la région **Europe (Irlande) eu-west-1**.     
+* Les fournisseurs de cloud **AWS**, pour ce lab choisissez et la région **Europe (Irlande) eu-west-1**.     
 * Après votre inscription, vous recevrez un e-mail avec un lien d'activation et une URL pour accéder à votre compte Snowflake.  
 
 ### Connexion à l'interface utilisateur (UI) de Snowflake:
