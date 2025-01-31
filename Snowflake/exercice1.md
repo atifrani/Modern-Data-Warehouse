@@ -1,6 +1,6 @@
 # Présentation du lab 1:
 
-Ce premier lab vous présente l'interface utilisateur et les fonctionnalités de base de Snowflake. Il est spécialement conçu pour être utilisé avec Snowflake, essai gratuit de 30 jours sur https://trial.snowflake.com. Une fois le laboratoire terminé, vous devriez être prêt à charger vos propres données dans Snowflake et à découvrir ses fonctionnalités plus avancées.
+Ce premier lab vous présente l'interface utilisateur et les fonctionnalités de base de Snowflake. Il est spécialement conçu pour être utilisé avec Snowflake, essai grahttps://github.com/atifrani/Modern-Data-Architecture/blob/main/Snowflake/exercice1.mdtuit de 30 jours sur https://trial.snowflake.com. Une fois le laboratoire terminé, vous devriez être prêt à charger vos propres données dans Snowflake et à découvrir ses fonctionnalités plus avancées.
 
 ## Conditions préalables:  
 * Utilisation de l'environnement d'essai gratuit de 30 jours de Snowflake.  
@@ -10,10 +10,13 @@ Ce premier lab vous présente l'interface utilisateur et les fonctionnalités de
 
 ## Préparez votre environnement de lab:
 
-Si ce n'est pas encore fait, inscrivez-vous pour un essai gratuit de Snowflake de 30 jours sur https://trial.snowflake.com.  
-L'édition Snowflake (Standard, Enterprise, Business Critical, etc.), pour ce lab choisissez **Entreprise Edition**.  
-Les fournisseurs de cloud (AWS, Azure, GCP), pour ce lab choisissez et la région **Europe (Irlande) eu-west-1**.     
-Après votre inscription, vous recevrez un e-mail avec un lien d'activation et une URL pour accéder à votre compte Snowflake.  
+Si ce n'est pas encore fait, inscrivez-vous pour un essai gratuit de Snowflake de 30 jours sur https://trial.snowflake.com. 
+* Utilisez l'addresse mail dans l'école.
+* Pour le nom de l'entreprise, utilisez **MBAESG**.  
+* Pour le role, choisissez **Etudiant**.
+* L'édition Snowflake (Standard, Enterprise, Business Critical, etc.), pour ce lab choisissez **Entreprise Edition**.  
+* Les fournisseurs de cloud (AWS, Azure, GCP), pour ce lab choisissez et la région **Europe (Irlande) eu-west-1**.     
+* Après votre inscription, vous recevrez un e-mail avec un lien d'activation et une URL pour accéder à votre compte Snowflake.  
 
 ### Connexion à l'interface utilisateur (UI) de Snowflake:
 
